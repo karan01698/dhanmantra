@@ -1,0 +1,119 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Teen Patti</title>-->
+<!--    <link rel="manifest" href="manifest.json">-->
+<!--    <meta name="description" content="Teen Patti Game">-->
+<!--    <meta name="theme-color" content="#000000">-->
+<!--</head>-->
+<!--<body>-->
+<!--<script src="flutter.js" defer></script>-->
+<!--<script>-->
+<!--    window.addEventListener('load', function(ev) {-->
+<!--      _flutter.loader.loadEntrypoint({-->
+<!--        entrypointUrl: "teenpattiess.dart.js"-->
+<!--      }).then(function(engineInitializer) {-->
+<!--        return engineInitializer.initializeEngine();-->
+<!--      }).then(function(appRunner) {-->
+<!--        return appRunner.runApp();-->
+<!--      });-->
+<!--    });-->
+<!--    <script>-->
+<!--function showWinnerDialog(winnerName, finalAmount, winnerPlayer, lastPlayer) {-->
+<!--  Swal.fire({-->
+<!--    title: '🏆 Winner',-->
+<!--    html: `-->
+<!--      <div style="width:100%; text-align:center; color:white;">-->
+<!--        <h2 style="color:white; font-size:22px; margin-bottom:10px;">${winnerName}</h2>-->
+<!--        <p style="color:lime; font-size:18px; font-weight:bold;">Won: ₹${Number(finalAmount).toFixed(2)}</p>-->
+
+<!--        <div style="display:flex; justify-content:space-around; margin-top:20px;">-->
+<!--          <div style="color:white;">-->
+<!--            <h4>Winner Player</h4>-->
+<!--            <p>${winnerPlayer || "N/A"}</p>-->
+<!--          </div>-->
+<!--          <div style="color:white;">-->
+<!--            <h4>Last Player</h4>-->
+<!--            <p>${lastPlayer || "N/A"}</p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    `,-->
+<!--    background: 'rgba(0,0,0,0.6)',-->
+<!--    color: '#fff',-->
+<!--    width: 500,-->
+<!--    padding: '20px',-->
+<!--    confirmButtonText: 'OK',-->
+<!--    confirmButtonColor: '#ff9800',-->
+<!--    allowOutsideClick: false,-->
+<!--    customClass: {-->
+<!--      popup: 'rounded-3xl border-4 border-orange-500'-->
+<!--    }-->
+<!--  });-->
+<!--}-->
+<!--</script>-->
+
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Teen Patti</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="description" content="Teen Patti Game">
+    <meta name="theme-color" content="#000000">
+    <!-- SweetAlert2 include -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+<script src="flutter.js" defer></script>
+
+<script>
+    window.addEventListener('load', function(ev) {
+      _flutter.loader.loadEntrypoint({
+        entrypointUrl: "teenpattiess.dart.js"
+      }).then(function(engineInitializer) {
+        return engineInitializer.initializeEngine();
+      }).then(function(appRunner) {
+        return appRunner.runApp();
+      });
+    });
+
+  function showWinnerDialog(winnerName, finalAmount, winnerPlayer, lastPlayer) {
+  try {
+    Swal.fire({
+      title: '🏆 Winner',
+      html: `
+        <div style="text-align:center; color:white;">
+          <h2>${winnerName}</h2>
+          <p style="color:lime; font-weight:bold;">Won: ₹${Number(finalAmount).toFixed(2)}</p>
+          <div style="display:flex; justify-content:space-around; margin-top:20px;">
+            <div>
+              <h4>Winner Player</h4>
+              <p>${winnerPlayer}</p>
+            </div>
+            <div>
+              <h4>Last Player</h4>
+              <p>${lastPlayer}</p>
+            </div>
+          </div>
+        </div>
+      `,
+      background: 'rgba(0,0,0,0.6)',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#ff9800',
+      allowOutsideClick: false
+    });
+  } catch(e) {
+    console.error("❌ showWinnerDialog failed:", e);
+    alert("JS dialog failed. Check console for error.");
+  }
+}
+    }
+</script>
+</body>
+</html>
