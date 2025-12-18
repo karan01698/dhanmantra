@@ -59,5 +59,5 @@ Kisi specific app kholna hai (jo URL scheme handle karta hai) → LaunchMode.ext
 
 speek book green black  
 cmd for buildig teen patti 
-flutter build web --release -t lib/screens/allScreens/othergames/teenpattiess/teenpattiess.dart -o build/web/teenpatties 
-
+flutter build web --release -t lib/screens/allScreens/othergames/teenpattiess/teenpattiess.dart -o build/web/teenpatties
+git clone https://github.com/karan01698/dhanmantra.git

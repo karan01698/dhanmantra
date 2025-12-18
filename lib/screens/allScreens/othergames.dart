@@ -127,12 +127,12 @@ class _ResponsiveCardLayoutState extends State<ResponsiveCardLayout> {
                   userController.userProfile.value?.bonus.toString() ?? '0.0') ??
                   0.0;
 
-              final double total = balance + bonus;
+              final double total = balance ;
 
-              if (total < 10) {
+              if (total < 100) {
                 Get.defaultDialog(
                   title: "Insufficient Balance",
-                  middleText: "You don't have sufficient balance to play.",
+                  middleText: "You cannot play this game with bonus money. Your main balance must be 100 or above.",
                   textConfirm: "OK",
                   confirmTextColor: Colors.white,
                   onConfirm: () {
@@ -158,8 +158,8 @@ class _ResponsiveCardLayoutState extends State<ResponsiveCardLayout> {
                   //   Get.put(RoomPlayerController());
                   //   Roomplayerscontroller.initRoomJoin(); // har baar room join karega
                   // }));
-                  launchWebGame('https://dhanmantragame.com/teenpatties/index.html');
-                  //  Get.to(() => ResponsiveTeenPattiScreen());
+                  // launchWebGame('https://dhanmantragame.com/teenpatties/index.html');
+                   Get.to(() => ResponsiveTeenPattiScreen());
                 } else {
                   Get.to(() => ResponsiveTeenPattiScreen());
                 }

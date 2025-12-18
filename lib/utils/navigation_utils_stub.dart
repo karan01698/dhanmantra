@@ -1,4 +1,4 @@
-
+//
 import 'dart:html' as html;
 
 import 'package:get/get.dart';
@@ -29,3 +29,33 @@ class NavigationUtils {
     Get.back();
   }
 }
+
+// lib/utils/navigation_utils.dart
+//
+// import 'package:flutter/foundation.dart';
+// import 'package:get/get.dart';
+// import 'package:sattagames/screens/home/home_screen.dart';
+//
+// // Conditional import — sirf Web pe dart:html load hoga
+// import 'navigation_utils_stub.dart' if (dart.library.html) 'navigation_utils_web.dart';
+//
+// class NavigationUtils {
+//   /// Web pe tab close karega, Mobile pe kuch nahi karega (safe hai)
+//   static void closeCurrentTab() {
+//     closeTabImpl(); // implementation alag file mein hai
+//   }
+//
+//   /// Home pe le jayega sab platform pe
+//   static void goToHome() {
+//     if (kIsWeb) {
+//       // Web pe external site pe bhej do
+//       redirectToWebHome();
+//     } else {
+//       // Mobile/Desktop pe normal navigation
+//       Get.offAll(() =>  MainHomeScreen());
+//     }
+//   }
+//
+//   // Ye methods alag file se aayenge (niche diya hai)
+//   static void closeTabImpl() => throw UnimplementedError();
+//   static void redirectToWebHome() => throw UnimplementedError();

@@ -114,8 +114,8 @@ class MyApp extends StatelessWidget {
         return kIsWeb
             ? FlutterWebFrame(
           builder: (context) => app,
-          maximumSize: const Size(400.0, 900.0),
-          // maximumSize: maxSize,
+          // maximumSize: const Size(400.0, 900.0),
+          maximumSize: maxSize,
           enabled: true,
         )
             : app;

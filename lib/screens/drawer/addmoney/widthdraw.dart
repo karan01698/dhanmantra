@@ -81,7 +81,7 @@ class WithdrawScreen extends StatelessWidget {
                               controllerss.isLoading.value = true;
                               double enteredAmount = double.tryParse(amountController.text) ?? 0.0;
 
-                              if (balance >= enteredAmount) {
+                              if (balance >300) {
                                 try {
                                   String? phone = await RegistrationController.getPhoneNumber();
                                   if (phone == null || phone.isEmpty) {
@@ -123,7 +123,7 @@ class WithdrawScreen extends StatelessWidget {
                                 // Show a proper message (you can use Get.snackbar or any other method you prefer)
                                 Get.snackbar(
                                   "Insufficient Balance",
-                                  "You don't have sufficient balance to withdraw.",
+                                  "Withdrawal is available only when your balance is above 300.",
                                   backgroundColor: Colors.redAccent,
                                   colorText: Colors.white,
                                 );

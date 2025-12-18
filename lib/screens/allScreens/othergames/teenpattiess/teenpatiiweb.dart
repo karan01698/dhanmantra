@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
-import 'dart:html' as html;
+// import 'dart:html' as html;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,6 +25,75 @@ import '../../../../utils/navigation_utils.dart';
 import '../../../../utils/navigation_utils_stub.dart';
 import '../../../../utils/responsvie_web_mobile.dart';
 import 'package:collection/collection.dart'; // for firstWhereOrNull / lastWhereOrNull
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'dart:convert';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+class AutoJoinBotsController extends GetxController {
+  var isLoading = false.obs;
+  var status = "".obs;
+  var botsAdded = 0.obs;
+
+  /// 🔹 Automatically call when controller is created
+  @override
+  void onInit() {
+    super.onInit();
+  // 👈 ek hi baar call hoga
+  }
+
+  Future<void> autoJoinBots(String roomId) async {
+    try {
+      isLoading.value = true;
+
+      final url = Uri.parse(
+        "https://dhanmantragame.com/APIs/WebService1.asmx/AutoJoinBots?roomId=$roomId",
+      );
+
+      final response = await http.get(url);
+
+      print("📦 RAW RESPONSE => ${response.body}");
+
+      if (response.statusCode == 200) {
+        // 🔥 STEP 1: saare JSON objects nikaalo
+        final matches = RegExp(r'\{[^}]*\}').allMatches(response.body).toList();
+
+        if (matches.isEmpty) {
+          print("❌ NO JSON FOUND");
+          return;
+        }
+
+        // 🔥 STEP 2: LAST JSON uthao (important)
+        final lastJson = matches.last.group(0)!;
+
+        print("🧹 CLEAN JSON (LAST) => $lastJson");
+
+        // 🔥 STEP 3: decode
+        final data = jsonDecode(lastJson);
+
+        status.value = data["status"] ?? "";
+
+        if (status.value == "bots_joined") {
+          botsAdded.value = data["bots_added"] ?? 0;
+        }
+
+        print("✅ BOT STATUS => ${status.value}");
+        print("🤖 BOTS ADDED => ${botsAdded.value}");
+      }
+    } catch (e) {
+      print("❌ EXCEPTION => $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+}
+
 
 class UserStatusResponse {
   final String message;
@@ -175,6 +244,8 @@ class RoomPlayerController extends GetxController {
   var allowOppositeAction = false;   // kya opposite action allowed hai?
   final StreamController<String> _balanceStreamController =
       StreamController<String>.broadcast();
+  final AutoJoinBotsController botsController =
+  Get.put(AutoJoinBotsController());
 
   Stream<String> get balanceStream => _balanceStreamController.stream;
   RoomController removecontoller = Get.put(RoomController());
@@ -186,6 +257,7 @@ class RoomPlayerController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
 
 
     html.window.onBeforeUnload.listen((event) async {
@@ -217,7 +289,39 @@ class RoomPlayerController extends GetxController {
   bool get isWaitingOrStarting =>
       playerList.length < 5 || (isGameStarting.value && countdown.value > 0);
 
-  //
+  Future<void> clearGameSession() async {
+    try {
+      // 1️⃣ Timers stop
+      turnTimer?.cancel();
+      turnTimer = null;
+
+      // 2️⃣ Streams close
+      await _balanceStreamController.close();
+
+      // 3️⃣ SharedPreferences clear (sirf game related)
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('roomId');
+      await prefs.remove('chaalType');
+      await prefs.remove('all_usernames');
+
+      // Agar full clean chahiye ho to (OPTIONAL)
+      // await prefs.clear();fi
+
+      // 4️⃣ Controller states reset
+      playerList.clear();
+      activeTurnUsername.value = '';
+      countdown.value = 0;
+      isGameStarting.value = false;
+      hasGameStarted = false;
+      isWinnerShown = false;
+      winnerFetched = false;
+
+      logPrint("🧹 Game session cleared successfully");
+    } catch (e) {
+      logPrint("❌ Error clearing game session: $e");
+    }
+  }
+
   Future<void> fetchTotalBalance() async {
     final url = Uri.parse(
         "https://dhanmantragame.com/APIs/WebService1.asmx/GetTotalBetByRoom");
@@ -232,6 +336,7 @@ class RoomPlayerController extends GetxController {
         },
         body: {
           "RoomID": savedRoomId,
+
         },
       );
 
@@ -317,17 +422,45 @@ class RoomPlayerController extends GetxController {
     }
   }
 
+  // void initRoomJoin() async {
+  //   RoomController roomcontroller = Get.put(RoomController());
+  //
+  //   String? phone = await RegistrationController
+  //       .getPhoneNumber(); // 🔹 Get saved phone number
+  //   if (phone == null || phone.isEmpty) {
+  //     logPrint("No saved phone number found.");
+  //     return;
+  //   }
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final savedRoomId = prefs.getString('roomId');
+  //   roomcontroller.joinOrCreateRoom(phone, phone);
+  //   await Get.find<AutoJoinBotsController>().autoJoinBots(savedRoomId);
+  // }
   void initRoomJoin() async {
-    RoomController roomcontroller = Get.put(RoomController());
+    final RoomController roomcontroller = Get.put(RoomController());
+    final String? phone = await RegistrationController.getPhoneNumber();
 
-    String? phone = await RegistrationController
-        .getPhoneNumber(); // 🔹 Get saved phone number
     if (phone == null || phone.isEmpty) {
-      logPrint("No saved phone number found.");
+      logPrint("❌ No phone number found");
       return;
     }
 
-    roomcontroller.joinOrCreateRoom(phone, phone);
+    // 1️⃣ Pehle JOIN / CREATE ROOM
+    await roomcontroller.joinOrCreateRoom(phone, phone);
+
+    // 2️⃣ Ab roomId read karo (ab guaranteed milega)
+    final prefs = await SharedPreferences.getInstance();
+    final savedRoomId = prefs.getString('roomId');
+
+    if (savedRoomId == null || savedRoomId.isEmpty) {
+      logPrint("❌ roomId still null, AutoBot nahi chalegi");
+      return;
+    }
+
+    logPrint("🤖 AutoBot calling for roomId: $savedRoomId");
+
+    // 3️⃣ Ab AutoBot call karo
+    await Get.find<AutoJoinBotsController>().autoJoinBots(savedRoomId);
   }
 
   void startPolling() {
@@ -1097,9 +1230,11 @@ class TeenPattiTableWeb extends StatelessWidget {
   final RoomPlayerController Roomplayerscontroller =
       Get.put(RoomPlayerController());
   final RoomController controller = Get.put(RoomController());
-
+  final AutoJoinBotsController botsController = Get.put(AutoJoinBotsController());
   @override
   Widget build(BuildContext context) {
+    final AutoJoinBotsController botsController =
+    Get.put(AutoJoinBotsController());
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final List<String> avatarUrls = [
@@ -1197,8 +1332,34 @@ class TeenPattiTableWeb extends StatelessWidget {
                             ),
                             elevation: 5,
                           ),
-                          onPressed: () async {
-                            Get.back(result: true);
+
+                            // Get.back(result: true);
+                            onPressed: () async {
+                              // 🔹 Phone & room cleanup API
+                              String? phone = await RegistrationController.getPhoneNumber();
+                              final prefs = await SharedPreferences.getInstance();
+                              final savedRoomId = prefs.getString('roomId');
+
+                              if (phone != null && savedRoomId != null) {
+                                await controller.removeUserBeforeStart(phone, savedRoomId);
+                              }
+
+                              // 🔹 Clear local game session
+                              await Roomplayerscontroller.clearGameSession();
+
+                              // 🔹 Remove controllers completely (important)
+                              Get.delete<RoomPlayerController>(force: true);
+                              Get.delete<RoomController>(force: true);
+                              Get.delete<AutoJoinBotsController>(force: true);
+                              Get.delete<ChaalAmountController>(force: true);
+
+                              // 🔹 Go back & rebuild fresh
+                              // Get.offAllNamed('/home');
+                              Get.back(result: true);
+                              // OR
+                              // Navigator.of(context).pop(true);
+
+
                           },
                           child: const Text("Yes",
                               style: TextStyle(color: Colors.white)),
